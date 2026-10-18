@@ -1,0 +1,63 @@
+{
+  "system": "Paperless-ngx",
+  "domain": "Document Management & OCR",
+  "sample_count": 8,
+  "modules": [
+    {
+      "module_id": "P01",
+      "name": "matching",
+      "process": "Dopasowywanie tagów, typów dokumentów i korespondentów",
+      "source_file": "src/matching.py",
+      "test_file": "tests/test_matching.py"
+    },
+    {
+      "module_id": "P02",
+      "name": "classifier",
+      "process": "Automatyczna klasyfikacja dokumentów (scikit-learn)",
+      "source_file": "src/classifier.py",
+      "test_file": "tests/test_classifier.py"
+    },
+    {
+      "module_id": "P03",
+      "name": "parsers",
+      "process": "Ekstrakcja tekstu i silnik parsowania OCR",
+      "source_file": "src/parsers.py",
+      "test_file": "tests/test_parsers.py"
+    },
+    {
+      "module_id": "P04",
+      "name": "consumer",
+      "process": "Kolejkowanie i wstępna walidacja dokumentu",
+      "source_file": "src/consumer.py",
+      "test_file": "tests/test_consumer.py"
+    },
+    {
+      "module_id": "P05",
+      "name": "models",
+      "process": "Integralność metadanych dokumentu i relacje bazy danych",
+      "source_file": "src/models.py",
+      "test_file": "tests/test_models.py"
+    },
+    {
+      "module_id": "P06",
+      "name": "permissions",
+      "process": "Zarządzanie uprawnieniami i dostępem użytkowników",
+      "source_file": "src/permissions.py",
+      "test_file": "tests/test_permissions.py"
+    },
+    {
+      "module_id": "P07",
+      "name": "tasks",
+      "process": "Zadania asynchroniczne i statusy błędów kolejki",
+      "source_file": "src/tasks.py",
+      "test_file": "tests/test_tasks.py"
+    },
+    {
+      "module_id": "P08",
+      "name": "sanity_check",
+      "process": "Walidacja spójności plików na dysku z bazą danych",
+      "source_file": "src/sanity_check.py",
+      "test_file": "tests/test_sanity_check.py"
+    }
+  ]
+}
