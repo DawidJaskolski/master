@@ -1,0 +1,300 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "version": "2.0",
+  "framework": "User Documentation & Architecture Recovery Evaluation",
+  "description": "Zbiór obiektywnych kryteriów oceny instrukcji użytkownika generowanych z kodu backendowego w podziale na kroki, funkcje i ograniczenia.",
+  "workflows": [
+    {
+      "workflow_id": "W01",
+      "system": "Paperless-ngx",
+      "domain": "Document Ingestion & OCR",
+      "name": "Wgrywanie, konsumpcja i przetwarzanie dokumentów",
+      "code_files": [
+        "data/samples/workflows/W01_paperless_ingestion/consumer.py",
+        "data/samples/workflows/W01_paperless_ingestion/parsers.py"
+      ],
+      "reference_doc": "data/ground_truth/reference_docs/paperless/usage.md",
+      "user_journey_steps": [
+        {
+          "id": "W01_STEP_01",
+          "name": "Dostarczenie pliku",
+          "description": "Przekazanie dokumentu do systemu jedną z dostępnych metod: przeciągnięcie w WebUI, wrzucenie do katalogu konsumpcji (consume folder) lub przez REST API."
+        },
+        {
+          "id": "W01_STEP_02",
+          "name": "Wstępna walidacja i kolejkowanie",
+          "description": "Weryfikacja formatu MIME, integralności pliku oraz wyliczenie sumy kontrolnej MD5 przed zakolejkowaniem asynchronicznego zadania."
+        },
+        {
+          "id": "W01_STEP_03",
+          "name": "Ekstrakcja tekstu i OCR",
+          "description": "Uruchomienie dedykowanego parsera (PDF, Raster, Text); w razie braku warstwy tekstowej generowanie jej przez silnik OCR."
+        },
+        {
+          "id": "W01_STEP_04",
+          "name": "Klasyfikacja i dopasowanie metadanych",
+          "description": "Automatyczne przypisanie tagów, korespondenta, typu dokumentu i ścieżki archiwizacji na podstawie wyodrębnionej treści."
+        },
+        {
+          "id": "W01_STEP_05",
+          "name": "Archiwizacja i indeksowanie",
+          "description": "Zapis pliku w docelowym archiwum, dodanie wpisu w bazie danych i zaindeksowanie pełnotekstowe w wyszukiwarce."
+        }
+      ],
+      "features": [
+        {
+          "id": "W01_FEAT_01",
+          "name": "Wieloplatformowy DocumentParser",
+          "description": "Architektura parserów dobierająca odpowiedni silnik (PDF vs obrazy rastrowe vs pliki tekstowe) na podstawie typu MIME."
+        },
+        {
+          "id": "W01_FEAT_02",
+          "name": "Wykrywanie i deduplikacja sumą kontrolną",
+          "description": "Zapobieganie ponownemu wgrywaniu identycznych plików na podstawie hasha MD5 zawartości."
+        },
+        {
+          "id": "W01_FEAT_03",
+          "name": "Wielojęzyczny OCR",
+          "description": "Możliwość wskazania języka rozpoznawania znaków oraz automatyczny fallback na język domyślny."
+        }
+      ],
+      "warnings_and_notes": [
+        {
+          "id": "W01_WARN_01",
+          "type": "WARNING",
+          "name": "Zaszyfrowane pliki PDF",
+          "statement": "Dokumenty PDF chronione hasłem nie mogą zostać przetworzone przez silnik OCR i rzucają wyjątek uniemożliwiający konsumpcję."
+        },
+        {
+          "id": "W01_WARN_02",
+          "type": "WARNING",
+          "name": "Nieobsługiwany format MIME",
+          "statement": "Próba wgrania pliku o nieobsługiwanym rozszerzeniu/typie MIME skutkuje przerwaniem procesu i statusem błędu ParseError."
+        },
+        {
+          "id": "W01_NOTE_01",
+          "type": "NOTE",
+          "name": "Zależność od binariów systemowych",
+          "statement": "Poprawne działanie silnika OCR i konwersji wymaga obecności zewnętrznych narzędzi systemowych (Tesseract, ImageMagick, Ghostscript/Poppler)."
+        }
+      ]
+    },
+    {
+      "workflow_id": "W02",
+      "system": "Paperless-ngx",
+      "domain": "Mail Automation",
+      "name": "Automatyczny pobór dokumentów z poczty e-mail",
+      "code_files": [
+        "data/samples/workflows/W02_paperless_mail/mail.py",
+        "data/samples/workflows/W02_paperless_mail/models.py"
+      ],
+      "reference_doc": "data/ground_truth/reference_docs/paperless/usage.md",
+      "user_journey_steps": [
+        {
+          "id": "W02_STEP_01",
+          "name": "Konfiguracja konta IMAP",
+          "description": "Zdefiniowanie serwera pocztowego, portu, poświadczeń logowania (SSL/TLS) oraz opcjonalnego uwierzytelniania tokenem."
+        },
+        {
+          "id": "W02_STEP_02",
+          "name": "Zdefiniowanie reguły pocztowej (Mail Rule)",
+          "description": "Określenie folderu IMAP do monitorowania, kryteriów filtrowania wiadomości oraz akcji po przetworzeniu."
+        },
+        {
+          "id": "W02_STEP_03",
+          "name": "Pobieranie i filtrowanie wiadomości",
+          "description": "Weryfikacja nadawcy, tematu oraz rozszerzeń załączników w przychodzących wiadomościach według zadanych filtrów."
+        },
+        {
+          "id": "W02_STEP_04",
+          "name": "Ekstrakcja załączników do potoku konsumpcji",
+          "description": "Wyodrębnienie spełniających warunki załączników i przekazanie ich jako nowe zadania do głównego modułu konsumpcji."
+        },
+        {
+          "id": "W02_STEP_05",
+          "name": "Wykonanie akcji końcowej na e-mailu",
+          "description": "Oznaczenie wiadomości jako przeczytana, przeniesienie do innego folderu pocztowego lub usunięcie z serwera."
+        }
+      ],
+      "features": [
+        {
+          "id": "W02_FEAT_01",
+          "name": "Filtrowanie załączników wg typu i rozmiaru",
+          "description": "Ignorowanie drobnych grafik (np. logotypów ze stopek) oraz filtrowanie plików po rozszerzeniach."
+        },
+        {
+          "id": "W02_FEAT_02",
+          "name": "Dynamiczne przypisywanie metadanych",
+          "description": "Nadawanie tagów i korespondenta na podstawie nagłówków e-mail (np. pole Od staje się korespondentem)."
+        },
+        {
+          "id": "W02_FEAT_03",
+          "name": "Opcja konsumpcji treści wiadomości",
+          "description": "Możliwość zarchiwizowania samego korpusu e-maila jako dokumentu tekstowego/PDF, a nie tylko załączników."
+        }
+      ],
+      "warnings_and_notes": [
+        {
+          "id": "W02_WARN_01",
+          "type": "WARNING",
+          "name": "Ryzyko pętli konsumpcji (Infinite Loop)",
+          "statement": "Nieskonfigurowanie akcji końcowej (brak oznaczenia jako przeczytana lub brak przeniesienia do innego folderu) spowoduje wielokrotne pobieranie tych samych dokumentów."
+        },
+        {
+          "id": "W02_NOTE_01",
+          "type": "NOTE",
+          "name": "Hasła aplikacji dla dostawców OAuth2",
+          "statement": "Dla kont pocztowych z włączonym 2FA (np. Gmail, Microsoft 365) konieczne jest wygenerowanie dedykowanego hasła aplikacji lub konfiguracja OAuth."
+        }
+      ]
+    },
+    {
+      "workflow_id": "W03",
+      "system": "Frappe HRMS",
+      "domain": "HR / Leave Management",
+      "name": "Wnioski urlopowe i bilansowanie absencji",
+      "code_files": [
+        "data/samples/workflows/W03_hrms_leave/leave_application.py"
+      ],
+      "reference_doc": "data/ground_truth/reference_docs/hrms/leave_application.md",
+      "user_journey_steps": [
+        {
+          "id": "W03_STEP_01",
+          "name": "Wybór pracownika i typu urlopu",
+          "description": "Wskazanie aktywnego pracownika oraz rodzaju wnioskowanej absencji (np. urlop wypoczynkowy, chorobowy)."
+        },
+        {
+          "id": "W03_STEP_02",
+          "name": "Określenie ram czasowych",
+          "description": "Wyznaczenie daty początkowej (From Date) oraz końcowej (To Date) z opcjonalnym zaznaczeniem urlopu połówkowego (Half Day)."
+        },
+        {
+          "id": "W03_STEP_03",
+          "name": "Weryfikacja dostępnego bilansu",
+          "description": "Automatyczne wyliczenie liczby dni roboczych przez system i porównanie z bieżącym przydziałem (Leave Allocation)."
+        },
+        {
+          "id": "W03_STEP_04",
+          "name": "Wskazanie zastępstwa i uzasadnienia",
+          "description": "Wprowadzenie powodu wniosku oraz opcjonalne przypisanie osoby pełniącej zastępstwo służbowe."
+        },
+        {
+          "id": "W03_STEP_05",
+          "name": "Wysłanie do akceptacji (Submit)",
+          "description": "Zatwierdzenie wniosku i przekazanie go do ścieżki akceptacji wyznaczonego przełożonego (Leave Approver)."
+        }
+      ],
+      "features": [
+        {
+          "id": "W03_FEAT_01",
+          "name": "Automatyczne wyliczanie dni roboczych",
+          "description": "Pomijanie weekendów oraz świąt zdefiniowanych w przypisanym kalendarzu Holiday List."
+        },
+        {
+          "id": "W03_FEAT_02",
+          "name": "Obsługa wniosków częściowych (Half Day)",
+          "description": "Rejestracja absencji na pierwszą lub drugą połowę dnia roboczego."
+        },
+        {
+          "id": "W03_FEAT_03",
+          "name": "Wnioski wsteczne",
+          "description": "Możliwość zgłaszania urlopów z datami przeszłymi (np. nagłe zwolnienie lekarskie) zgodnie z polityką firmy."
+        }
+      ],
+      "warnings_and_notes": [
+        {
+          "id": "W03_WARN_01",
+          "type": "WARNING",
+          "name": "Blokada nakładających się terminów (Overlapping Leaves)",
+          "statement": "System rzuca błąd walidacji i bezwzględnie blokuje zatwierdzenie wniosku, jeśli podany zakres dat koliduje z innym wnioskiem danego pracownika."
+        },
+        {
+          "id": "W03_WARN_02",
+          "type": "WARNING",
+          "name": "Niewystarczający stan bilansu (Insufficient Balance)",
+          "statement": "Przekroczenie liczby dostępnych dni z alokacji uniemożliwia zatwierdzenie wniosku, chyba że typ urlopu ma włączoną flagę Allow Negative Balance."
+        },
+        {
+          "id": "W03_NOTE_01",
+          "type": "NOTE",
+          "name": "Niemutowalność po wysłaniu (Submit)",
+          "statement": "Po wysłaniu wniosku do akceptacji pracownik traci możliwość edycji pól; korekta wymaga formalnego odrzucenia lub anulowania przez przełożonego."
+        }
+      ]
+    },
+    {
+      "workflow_id": "W04",
+      "system": "Frappe HRMS",
+      "domain": "HR / Expense Management",
+      "name": "Rozliczanie wydatków służbowych i delegacji",
+      "code_files": [
+        "data/samples/workflows/W04_hrms_expense/expense_claim.py"
+      ],
+      "reference_doc": "data/ground_truth/reference_docs/hrms/expense_claim.md",
+      "user_journey_steps": [
+        {
+          "id": "W04_STEP_01",
+          "name": "Inicjalizacja wniosku o zwrot",
+          "description": "Wybór pracownika, potwierdzenie jednostki rozliczeniowej (Company) oraz weryfikującego przełożonego (Expense Approver)."
+        },
+        {
+          "id": "W04_STEP_02",
+          "name": "Uzupełnienie pozycji kosztowych",
+          "description": "Wprowadzenie wierszy wydatków: typ kosztu, data poniesienia, kwota zgłaszana (Claimed Amount) oraz uzasadnienie."
+        },
+        {
+          "id": "W04_STEP_03",
+          "name": "Dołączenie dokumentacji dowodowej",
+          "description": "Załączenie plików skanów faktur, paragonów lub biletów w sekcji załączników rekordu."
+        },
+        {
+          "id": "W04_STEP_04",
+          "name": "Rozliczenie pobranych zaliczek",
+          "description": "Powiązanie wcześniejszych zaliczek służbowych w sekcji Advances w celu pomniejszenia należnego zwrotu."
+        },
+        {
+          "id": "W04_STEP_05",
+          "name": "Wysłanie do weryfikacji i akceptacji",
+          "description": "Formalne przesłanie wniosku do przełożonego w celu weryfikacji kwot i zatwierdzenia kwoty kwalifikowanej."
+        }
+      ],
+      "features": [
+        {
+          "id": "W04_FEAT_01",
+          "name": "Korekta kwoty zatwierdzonej (Sanctioned Amount)",
+          "description": "Możliwość obniżenia wypłacanej kwoty przez przełożonego, jeśli część wydatków nie spełnia wymogów regulaminu."
+        },
+        {
+          "id": "W04_FEAT_02",
+          "name": "Kompensata zaliczek (Advance Offset)",
+          "description": "Automatyczne potrącenie salda wypłaconych wcześniej zaliczek od łącznej kwoty zatwierdzonych kosztów."
+        },
+        {
+          "id": "W04_FEAT_03",
+          "name": "Wielokanałowy zwrot kosztów",
+          "description": "Wybór metody wypłaty: dołączenie do najbliższego paska wynagrodzenia (Salary Slip) lub niezależny przelew (Payment Entry)."
+        }
+      ],
+      "warnings_and_notes": [
+        {
+          "id": "W04_WARN_01",
+          "type": "WARNING",
+          "name": "Maksymalna kwota zatwierdzona",
+          "statement": "Wartość w polu Sanctioned Amount nie może przewyższać pierwotnie zgłoszonej kwoty Claimed Amount."
+        },
+        {
+          "id": "W04_WARN_02",
+          "type": "WARNING",
+          "name": "Wymóg powiązania kont księgowych",
+          "statement": "Zgłoszenie nie może zostać zatwierdzone księgowo bez zdefiniowanego domyślnego konta kosztowego dla danego typu wydatku oraz konta rozrachunków pracowniczych."
+        },
+        {
+          "id": "W04_NOTE_01",
+          "type": "NOTE",
+          "name": "Wymóg pełnej akceptacji przed płatnością",
+          "statement": "Wygenerowanie zlecenia płatności (Payment Entry) jest blokowane do momentu przejścia wniosku w status zatwierdzony (Approved) i wysłany (Submitted)."
+        }
+      ]
+    }
+  ]
+}
